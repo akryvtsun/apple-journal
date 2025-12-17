@@ -1,3 +1,5 @@
+package diaro
+
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.module.SimpleModule
@@ -7,24 +9,24 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-val formatter = java.time.format.DateTimeFormatter.ofPattern(
+val formatter = DateTimeFormatter.ofPattern(
     "dd MMMM yyyy, EEEE HH:mm",
-    java.util.Locale.ENGLISH
+    Locale.ENGLISH
 )
 
 val module = SimpleModule().apply {
     addSerializer(
-        java.time.LocalDateTime::class.java,
-        LocalDateTimeSerializer(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+        LocalDateTime::class.java,
+        LocalDateTimeSerializer(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
     )
 }
-`
+
 val mapper = ObjectMapper().registerModule(module).setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
 
-data class JournalEntry(val date: java.time.LocalDateTime, val title: String, val body: String)
+data class JournalEntry(val date: LocalDateTime, val title: String, val body: String)
 
 fun main() {
-    val textEntries = java.io.File("/Users/akryvtsun/entryExport.txt").readText()
+    val textEntries = File("/Users/akryvtsun/entryExport.txt").readText()
         .split("-".repeat(96))
     //.take(3)
     val entries = textEntries
@@ -36,7 +38,7 @@ fun main() {
         }
         .map { entry ->
             var lines = entry
-            val timestamp = java.time.LocalDateTime.parse(lines.first(), formatter)
+            val timestamp = LocalDateTime.parse(lines.first(), formatter)
             lines = lines.drop(2)
 
             val titleLine = lines.first()
@@ -51,5 +53,5 @@ fun main() {
             JournalEntry(timestamp, title, body)
         }
     val json = mapper.writeValueAsString(entries)
-    java.io.File("/Users/akryvtsun/journal_json.txt").writeText(json)
+    File("/Users/akryvtsun/journal_json.txt").writeText(json)
 }
