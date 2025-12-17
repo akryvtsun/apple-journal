@@ -1,3 +1,9 @@
+
+# IntelliJ IDEA specific files
+.idea/
+*.iml
+*.iws
+
 # Compiled class file
 *.class
 
